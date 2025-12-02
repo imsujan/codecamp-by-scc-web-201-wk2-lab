@@ -19,6 +19,9 @@
 //       Later, after injecting HTML with innerHTML, we can use ! (non-null assertion)
 //       because we know those elements exist.
 
+const eventPanel = document.querySelector<HTMLElement>("#event-panel");
+if (!eventPanel) throw new Error("#event-panel not found");
+
 // TODO: Step 2 - Inject the Event Explorer markup
 // Use innerHTML to add the HTML structure (see lab instructions)
 // Why innerHTML? For static markup injected once, it's simpler than createElement.
@@ -30,6 +33,46 @@
 //   - Nested boxes (outer → middle → inner)
 //   - Event log section (with aria-live="polite" for screen readers)
 //   - Event quiz section
+
+eventPanel.innerHTML = `
+  <section class="event-lab">
+    <header>
+      <h2>Event Explorer</h2>
+      <p>Click inside the boxes and watch the event log.</p>
+    </header>
+
+    <div class="modes">
+      <label><input type="radio" name="mode" value="direct" checked> Direct listeners</label>
+      <label><input type="radio" name="mode" value="delegated"> Delegated listener</label>
+      <label><input type="checkbox" id="stop-prop"> stopPropagation on inner</label>
+    </div>
+
+    <div class="boxes" id="box-root">
+      <div class="box outer" data-name="outer">
+        outer
+        <div class="box middle" data-name="middle">
+          middle
+          <button class="box inner" data-name="inner">inner (button)</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="log">
+      <h3>Event log</h3>
+      <ol id="event-log" aria-live="polite"></ol>
+    </section>
+       <section class="event-quiz">
+      <h3>Predict the log</h3>
+      <p>Select a scenario, write your prediction, then run it.</p>
+      <ol>
+        <li>Direct mode, click <code>inner</code>, stopPropagation OFF.</li>
+        <li>Direct mode, click <code>inner</code>, stopPropagation ON.</li>
+        <li>Delegated mode, click <code>middle</code>, stopPropagation OFF.</li>
+        <li>Delegated mode, click <code>outer</code>.</li>
+      </ol>
+    </section>
+
+  </section>`;
 
 // TODO: Step 3 - Set up logging helper
 // Create a function that appends log entries to #event-log
