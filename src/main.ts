@@ -15,9 +15,9 @@ import './styles.css'
 
 // Import the three panel modules
 // TODO: Uncomment these imports as you implement each panel
-// import './eventExplorer'
-// import './layoutPlayground'
-// import './modalLab'
+import './eventExplorer'
+import './layoutPlayground'
+import './modalLab'
 
 /**
  * Why this structure?

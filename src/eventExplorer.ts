@@ -34,6 +34,7 @@ if (!eventPanel) throw new Error("#event-panel not found");
 //   - Event log section (with aria-live="polite" for screen readers)
 //   - Event quiz section
 
+
 eventPanel.innerHTML = `
   <section class="event-lab">
     <header>
@@ -79,6 +80,21 @@ eventPanel.innerHTML = `
 // Use prepend() to show newest entries first
 // Format: [mode] handler=label, target=name, currentTarget=name
 
+const boxRoot = document.querySelector<HTMLElement>("#box-root")!;
+const eventLog = document.querySelector<HTMLOListElement>("#event-log")!;
+const stopPropCheckbox =
+  document.querySelector<HTMLInputElement>("#stop-prop")!;
+const modeInputs =
+  document.querySelectorAll<HTMLInputElement>('input[name="mode"]');
+
+
+
+function log(message: string) {
+const li = document.createElement("li");
+li.textContent = message;
+eventLog.prepend(li); // newest first
+}
+
 // TODO: Step 4 - Implement direct listeners mode
 // Attach click listeners directly to .outer, .middle, .inner
 // In each handler, log:
@@ -87,11 +103,67 @@ eventPanel.innerHTML = `
 //   - event.currentTarget (which element's handler is running)
 // Handle stopPropagation checkbox: if checked and handler is "inner", call event.stopPropagation()
 
+function setupDirectListeners() {
+  log("--- switched to direct listeners ---");
+
+  const outer = boxRoot.querySelector<HTMLElement>(".outer")!;
+  const middle = boxRoot.querySelector<HTMLElement>(".middle")!;
+  const inner = boxRoot.querySelector<HTMLElement>(".inner")!;
+
+  function handler(label: string) {
+    return (event: MouseEvent) => {
+      if (stopPropCheckbox.checked && label === "inner") {
+        event.stopPropagation();
+      }
+      const t = event.target as HTMLElement | null;
+      const c = event.currentTarget as HTMLElement | null;
+      log(
+        `[direct] handler=${label}, target=${t?.dataset.name}, currentTarget=${c?.dataset.name}`
+      );
+    };
+  }
+
+  outer.addEventListener("click", handler("outer"));
+  middle.addEventListener("click", handler("middle"));
+  inner.addEventListener("click", handler("inner"));
+
+  cleanup = () => {
+    outer.replaceWith(outer.cloneNode(true));
+    middle.replaceWith(middle.cloneNode(true));
+    inner.replaceWith(inner.cloneNode(true));
+  };
+}
+
 // TODO: Step 5 - Implement delegated listener mode
 // Attach ONE click listener to #box-root (the parent)
 // Use event.target and closest('.box') to find which box was clicked
 // Log the same info but note it's coming from the delegated handler
 // This is the pattern you'll use for menus, tables, tag lists, etc.
+function setupDelegatedListener() {
+  log("--- switched to delegated listener ---");
+
+  function delegatedHandler(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    const box = target?.closest<HTMLElement>(".box");
+    if (!box) return;
+
+    const name = box.dataset.name ?? "unknown";
+    if (stopPropCheckbox.checked && name === "inner") {
+      event.stopPropagation();
+    }
+
+    log(
+      `[delegated] handler=box-root, target=${target?.dataset.name}, closestBox=${name}`
+    );
+  }
+
+  boxRoot.addEventListener("click", delegatedHandler);
+
+  cleanup = () => {
+    boxRoot.removeEventListener("click", delegatedHandler);
+  };
+}
+
 
 // TODO: Step 6 - Wire up mode switching
 // Listen for changes on the radio buttons (name="mode")
@@ -103,6 +175,22 @@ eventPanel.innerHTML = `
 //      elements, so stale references aren't an issue.
 //   2. Set up new listeners based on selected mode
 //   3. Log a separator line to show the switch
+modeInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!input.checked) return;
+    if (cleanup) cleanup(); // Remove old listeners
+    // After cleanup, setup functions will re-query elements, so fresh references
+    if (input.value === "direct") {
+      setupDirectListeners();
+    } else {
+      setupDelegatedListener();
+    }
+  });
+});
+
+// initial mode
+setupDirectListeners();
+
 
 // TODO: Step 7 (Optional but powerful) - Show event phase
 // Extend handlers to log event.eventPhase (1=capture, 2=target, 3=bubble)
