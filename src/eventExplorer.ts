@@ -33,8 +33,6 @@ if (!eventPanel) throw new Error("#event-panel not found");
 //   - Nested boxes (outer → middle → inner)
 //   - Event log section (with aria-live="polite" for screen readers)
 //   - Event quiz section
-
-
 eventPanel.innerHTML = `
   <section class="event-lab">
     <header>
@@ -43,26 +41,27 @@ eventPanel.innerHTML = `
     </header>
 
     <div class="modes">
-      <label><input type="radio" name="mode" value="direct" checked> Direct listeners</label>
-      <label><input type="radio" name="mode" value="delegated"> Delegated listener</label>
-      <label><input type="checkbox" id="stop-prop"> stopPropagation on inner</label>
+      <label><input type="radio" name="mode" value="direct" checked> Direct Listeners</label>
+      <label><input type="radio" name="mode" value="delegated"> Delegated Listener</label>
+      <label><input type="checkbox" id="stop-prop"> Stop Propagation on Inner</label>
     </div>
 
     <div class="boxes" id="box-root">
-      <div class="box outer" data-name="outer">
-        outer
-        <div class="box middle" data-name="middle">
+      <div class="box outer" data-name="Outer">
+        Outer
+        <div class="box middle" data-name="Middle">
           middle
-          <button class="box inner" data-name="inner">inner (button)</button>
+          <button class="box inner" data-name="Inner">Inner (button)</button>
         </div>
       </div>
     </div>
 
     <section class="log">
-      <h3>Event log</h3>
+      <h2>Event log</h2>
+      <button id = "clear-log" type = "button">Clear Log</button>
       <ol id="event-log" aria-live="polite"></ol>
     </section>
-       <section class="event-quiz">
+     <section class="event-quiz">
       <h3>Predict the log</h3>
       <p>Select a scenario, write your prediction, then run it.</p>
       <ol>
@@ -73,27 +72,28 @@ eventPanel.innerHTML = `
       </ol>
     </section>
 
-  </section>`;
+  </section>`
+
+
 
 // TODO: Step 3 - Set up logging helper
 // Create a function that appends log entries to #event-log
 // Use prepend() to show newest entries first
 // Format: [mode] handler=label, target=name, currentTarget=name
-
 const boxRoot = document.querySelector<HTMLElement>("#box-root")!;
 const eventLog = document.querySelector<HTMLOListElement>("#event-log")!;
 const stopPropCheckbox =
   document.querySelector<HTMLInputElement>("#stop-prop")!;
 const modeInputs =
   document.querySelectorAll<HTMLInputElement>('input[name="mode"]');
-
-
+const clearLogButton = document.querySelector<HTMLButtonElement>("#clear-log")!;
 
 function log(message: string) {
-const li = document.createElement("li");
-li.textContent = message;
-eventLog.prepend(li); // newest first
+  const li = document.createElement("li");
+  li.textContent = message;
+  eventLog.prepend(li); // newest first
 }
+
 
 // TODO: Step 4 - Implement direct listeners mode
 // Attach click listeners directly to .outer, .middle, .inner
@@ -102,6 +102,7 @@ eventLog.prepend(li); // newest first
 //   - event.target (where the click actually happened)
 //   - event.currentTarget (which element's handler is running)
 // Handle stopPropagation checkbox: if checked and handler is "inner", call event.stopPropagation()
+let cleanup: (() => void) | null = null;
 
 function setupDirectListeners() {
   log("--- switched to direct listeners ---");
@@ -120,6 +121,20 @@ function setupDirectListeners() {
       log(
         `[direct] handler=${label}, target=${t?.dataset.name}, currentTarget=${c?.dataset.name}`
       );
+
+      const phaseNames: Record<number, string> = {
+  1: "capturing",
+  2: "at-target",
+  3: "bubbling",
+};
+
+const phase = phaseNames[event.eventPhase] ?? "unknown";
+const path = (event.composedPath?.() ?? [])
+  .filter((n) => n instanceof HTMLElement)
+  .map((n) => (n as HTMLElement).tagName.toLowerCase())
+  .join(" → ");
+
+log(`[direct] phase=${phase}, path=${path}`);
     };
   }
 
@@ -163,18 +178,6 @@ function setupDelegatedListener() {
     boxRoot.removeEventListener("click", delegatedHandler);
   };
 }
-
-
-// TODO: Step 6 - Wire up mode switching
-// Listen for changes on the radio buttons (name="mode")
-// When mode changes:
-//   1. Clean up old listeners (call cleanup function if it exists)
-//      Note: For direct listeners, cleanup clones nodes (removes listeners).
-//            For delegated listeners, cleanup uses removeEventListener.
-//      After cleanup, setupDirectListeners/setupDelegatedListener will re-query
-//      elements, so stale references aren't an issue.
-//   2. Set up new listeners based on selected mode
-//   3. Log a separator line to show the switch
 modeInputs.forEach((input) => {
   input.addEventListener("change", () => {
     if (!input.checked) return;
@@ -188,9 +191,23 @@ modeInputs.forEach((input) => {
   });
 });
 
+
+// TODO: Step 6 - Wire up mode switching
+// Listen for changes on the radio buttons (name="mode")
+// When mode changes:
+//   1. Clean up old listeners (call cleanup function if it exists)
+//      Note: For direct listeners, cleanup clones nodes (removes listeners).
+//            For delegated listeners, cleanup uses removeEventListener.
+//      After cleanup, setupDirectListeners/setupDelegatedListener will re-query
+//      elements, so stale references aren't an issue.
+//   2. Set up new listeners based on selected mode
+//   3. Log a separator line to show the switch
+
+
+
 // initial mode
 setupDirectListeners();
-
+setupDelegatedListener();
 
 // TODO: Step 7 (Optional but powerful) - Show event phase
 // Extend handlers to log event.eventPhase (1=capture, 2=target, 3=bubble)

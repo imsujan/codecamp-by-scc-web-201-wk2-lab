@@ -181,22 +181,29 @@ select:focus-visible {
    ========================================================================== */
 
 /* Event Explorer styles will go here */
+.app-header {
+  top: 0;
+  background: #ffb1ee;
+}
 .event-lab .boxes {
   padding: 1rem;
 }
 .box {
-  border: 2px solid #4b5563;
+  border: 2px solid #ffffff;
   padding: 1rem;
   margin: 0.5rem;
 }
 .box.outer {
-  background: #eef2ff;
+  background: #5e9bff;
+  border-radius: 1rem;
 }
 .box.middle {
-  background: #e0f2fe;
+  background: #ff8e59;
+  border-radius: 1rem;
 }
 .box.inner {
-  background: #dcfce7;
+  background: #8f9aff;
+  border-radius: 1rem;
 }
 .log {
   margin-top: 1rem;
@@ -209,7 +216,76 @@ select:focus-visible {
   margin-top: 1rem;
   font-size: 0.9rem;
 }
+.subtitle{
+  color: black;
+}
 /* Box Model + Flex styles will go here */
+.layout-lab .controls label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+.box-wrapper {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.demo-box {
+  background: #e0f2fe;
+  color: #111827;
+  min-width: 80px;
+  min-height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.metrics {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+.metrics dt {
+  font-weight: 600;
+}
+.metrics dd {
+  margin: 0;
+}
+.flex-lab {
+  margin-top: 2rem;
+}
+.flex-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.flex-target {
+  min-height: 120px;
+  border: 1px dashed #9ca3af;
+  padding: 0.75rem;
+  display: flex;
+}
+.flex-target .card {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+.flex-poses {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+.flex-poses li {
+  margin-bottom: 0.25rem;
+}
 /* Modal Lab styles will go here */
 
 
