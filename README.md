@@ -9,7 +9,7 @@
 
 ## 🔗 Live Links
 
-**Firebase URL:** _[Paste your deployed URL here]_  
+**Firebase URL:** https://cc-sujan-maharjan-wk2-lab.web.app/  
 **Demo Video:** _[Link to your 60-second demo video]_
 
 ---
