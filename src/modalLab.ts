@@ -12,8 +12,8 @@
  */
 
 // TODO: Step 1 - Grab the panel container
-// const modalPanel = document.querySelector<HTMLElement>('#modal-panel')
-// if (!modalPanel) throw new Error('#modal-panel not found')
+const modalPanel = document.querySelector<HTMLElement>('#modal-panel')
+if (!modalPanel) throw new Error('#modal-panel not found')
 
 // TODO: Step 2 - Inject modal markup
 // Include:
@@ -26,6 +26,34 @@
 //     - aria-labelledby pointing to modal title
 //     - tabindex="-1" (makes it focusable programmatically but removes from tab order)
 //     - Title, content, close button, extra button (for focus trap testing)
+
+modalPanel.innerHTML = `
+  <section class="modal-lab">
+    <header>
+      <h2>Modal Lab</h2>
+      <p>Open the dialog and try tabbing. ESC closes and focus returns.</p>
+    </header>
+
+    <button id="open-modal" class="btn-primary">Open demo modal</button>
+    <button id="open-modal-2" class="btn-secondary">Open from here</button>
+
+    <div class="backdrop hidden" id="modal-backdrop"></div>
+
+    <div
+      class="modal hidden"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+      tabindex="-1"
+    >
+       <h3 id="modal-title">Demo modal</h3>
+      <p>This is a keyboard-friendly modal. Try Tab, Shift+Tab, and Escape.</p>
+      <button id="modal-close">Close</button>
+      <button>Extra action</button>
+    </div>
+
+  </section>`
 
 // TODO: Step 3 - Add CSS for modal
 // Style:
@@ -41,6 +69,32 @@
 //   3. Prevent body scroll: document.body.style.overflow = 'hidden'
 //   4. Find all focusable elements in modal (getFocusableElements helper)
 //   5. Focus first focusable element (or modal itself if none)
+const openBtn = document.querySelector<HTMLButtonElement>('#open-modal')!
+const openBtn2 = document.querySelector<HTMLButtonElement>('#open-modal-2')!
+const modal = document.querySelector<HTMLElement>('#modal')!
+const closeBtn = document.querySelector<HTMLButtonElement>('#modal-close')!
+const backdrop = document.querySelector<HTMLElement>('#modal-backdrop')!
+
+let lastFocused: Element | null = null
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  const selector =
+    'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
+  return Array.from(container.querySelectorAll<HTMLElement>(selector)).filter(
+    el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden')
+  )
+}
+
+function openModal(trigger: HTMLElement) {
+  lastFocused = trigger
+
+  backdrop.classList.remove('hidden')
+  modal.classList.remove('hidden')
+  document.body.style.overflow = 'hidden'
+
+  const focusables = getFocusableElements(modal)
+  ;(focusables[0] ?? modal).focus()
+}
 
 // TODO: Step 5 - Implement closeModal function
 // Steps:
@@ -48,13 +102,52 @@
 //   2. Restore body scroll: document.body.style.overflow = ''
 //   3. Return focus to lastFocused element (the trigger button)
 
-// TODO: Step 6 - Wire up open triggers
-// Add click listeners to both trigger buttons
-// Each calls openModal(triggerElement)
+function closeModal() {
+  backdrop.classList.add('hidden')
+  modal.classList.add('hidden')
+  document.body.style.overflow = ''
 
-// TODO: Step 7 - Wire up close triggers
-// Add click listener to close button → calls closeModal()
-// Add click listener to backdrop → calls closeModal()
+  if (lastFocused instanceof HTMLElement) {
+    lastFocused.focus()
+  }
+}
+
+openBtn.addEventListener('click', () => openModal(openBtn))
+openBtn2.addEventListener('click', () => openModal(openBtn2))
+closeBtn.addEventListener('click', closeModal)
+backdrop.addEventListener('click', closeModal)
+modal.addEventListener('keydown', (event: KeyboardEvent) => {
+  const key = event.key
+
+  if (key === 'Escape') {
+    event.preventDefault()
+    closeModal()
+    return
+  }
+
+  if (key !== 'Tab') return
+
+  const focusables = getFocusableElements(modal)
+  if (focusables.length === 0) return
+
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  const current = document.activeElement as HTMLElement | null
+
+  if (event.shiftKey) {
+    // Shift+Tab (backwards)
+    if (current === first || !focusables.includes(current!)) {
+      event.preventDefault() // Prevent default Tab behavior
+      last.focus() // Wrap to last element
+    }
+  } else {
+    // Tab (forwards)
+    if (current === last || !focusables.includes(current!)) {
+      event.preventDefault() // Prevent default Tab behavior
+      first.focus() // Wrap to first element
+    }
+  }
+})
 
 // TODO: Step 8 - Implement focus trap
 // Add keydown listener to modal element
@@ -87,5 +180,4 @@
 // - Open from different buttons (focus should return to correct one)
 // - Check with screen reader if possible
 
-export { } // Make this a module
-
+export {} // Make this a module

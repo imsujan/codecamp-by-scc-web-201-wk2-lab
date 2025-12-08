@@ -114,22 +114,22 @@ firebase deploy
 
 _Write 2-3 sentences about what you learned about events:_
 
-1. 
-2. 
+1.
+2.
 
 ### Box Model + Flex
 
 _Write 2-3 sentences about what you learned about layout:_
 
-1. 
-2. 
+1.
+2.
 
 ### Modal & Focus
 
 _Write 2-3 sentences about what you learned about accessibility:_
 
-1. 
-2. 
+1.
+2.
 
 ---
 
@@ -137,9 +137,9 @@ _Write 2-3 sentences about what you learned about accessibility:_
 
 _Describe any bugs or confusion you encountered and how you solved them:_
 
-| Issue | Solution | Time Lost |
-|-------|----------|-----------|
-| _e.g., Event log not updating_ | _Forgot to call prepend() instead of append()_ | _10 min_ |
+| Issue                          | Solution                                       | Time Lost |
+| ------------------------------ | ---------------------------------------------- | --------- |
+| _e.g., Event log not updating_ | _Forgot to call prepend() instead of append()_ | _10 min_  |
 
 ---
 

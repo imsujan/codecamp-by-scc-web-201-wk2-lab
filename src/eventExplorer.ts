@@ -19,8 +19,8 @@
 //       Later, after injecting HTML with innerHTML, we can use ! (non-null assertion)
 //       because we know those elements exist.
 
-const eventPanel = document.querySelector<HTMLElement>("#event-panel");
-if (!eventPanel) throw new Error("#event-panel not found");
+const eventPanel = document.querySelector<HTMLElement>('#event-panel')
+if (!eventPanel) throw new Error('#event-panel not found')
 
 // TODO: Step 2 - Inject the Event Explorer markup
 // Use innerHTML to add the HTML structure (see lab instructions)
@@ -74,26 +74,27 @@ eventPanel.innerHTML = `
 
   </section>`
 
-
-
 // TODO: Step 3 - Set up logging helper
 // Create a function that appends log entries to #event-log
 // Use prepend() to show newest entries first
 // Format: [mode] handler=label, target=name, currentTarget=name
-const boxRoot = document.querySelector<HTMLElement>("#box-root")!;
-const eventLog = document.querySelector<HTMLOListElement>("#event-log")!;
-const stopPropCheckbox =
-  document.querySelector<HTMLInputElement>("#stop-prop")!;
+const boxRoot = document.querySelector<HTMLElement>('#box-root')!
+const eventLog = document.querySelector<HTMLOListElement>('#event-log')!
+const stopPropCheckbox = document.querySelector<HTMLInputElement>('#stop-prop')!
 const modeInputs =
-  document.querySelectorAll<HTMLInputElement>('input[name="mode"]');
-const clearLogButton = document.querySelector<HTMLButtonElement>("#clear-log")!;
+  document.querySelectorAll<HTMLInputElement>('input[name="mode"]')
+const clearLogButton = document.querySelector<HTMLButtonElement>('#clear-log')!
 
 function log(message: string) {
-  const li = document.createElement("li");
-  li.textContent = message;
-  eventLog.prepend(li); // newest first
+  const li = document.createElement('li')
+  li.textContent = message
+  eventLog.prepend(li) // newest first
 }
 
+// Add this to use clearLogButton
+clearLogButton.addEventListener('click', () => {
+  eventLog.innerHTML = ''
+})
 
 // TODO: Step 4 - Implement direct listeners mode
 // Attach click listeners directly to .outer, .middle, .inner
@@ -102,51 +103,51 @@ function log(message: string) {
 //   - event.target (where the click actually happened)
 //   - event.currentTarget (which element's handler is running)
 // Handle stopPropagation checkbox: if checked and handler is "inner", call event.stopPropagation()
-let cleanup: (() => void) | null = null;
+let cleanup: (() => void) | null = null
 
 function setupDirectListeners() {
-  log("--- switched to direct listeners ---");
+  log('--- switched to direct listeners ---')
 
-  const outer = boxRoot.querySelector<HTMLElement>(".outer")!;
-  const middle = boxRoot.querySelector<HTMLElement>(".middle")!;
-  const inner = boxRoot.querySelector<HTMLElement>(".inner")!;
+  const outer = boxRoot.querySelector<HTMLElement>('.outer')!
+  const middle = boxRoot.querySelector<HTMLElement>('.middle')!
+  const inner = boxRoot.querySelector<HTMLElement>('.inner')!
 
   function handler(label: string) {
     return (event: MouseEvent) => {
-      if (stopPropCheckbox.checked && label === "inner") {
-        event.stopPropagation();
+      if (stopPropCheckbox.checked && label === 'inner') {
+        event.stopPropagation()
       }
-      const t = event.target as HTMLElement | null;
-      const c = event.currentTarget as HTMLElement | null;
+      const t = event.target as HTMLElement | null
+      const c = event.currentTarget as HTMLElement | null
       log(
         `[direct] handler=${label}, target=${t?.dataset.name}, currentTarget=${c?.dataset.name}`
-      );
+      )
 
       const phaseNames: Record<number, string> = {
-  1: "capturing",
-  2: "at-target",
-  3: "bubbling",
-};
+        1: 'capturing',
+        2: 'at-target',
+        3: 'bubbling',
+      }
 
-const phase = phaseNames[event.eventPhase] ?? "unknown";
-const path = (event.composedPath?.() ?? [])
-  .filter((n) => n instanceof HTMLElement)
-  .map((n) => (n as HTMLElement).tagName.toLowerCase())
-  .join(" → ");
+      const phase = phaseNames[event.eventPhase] ?? 'unknown'
+      const path = (event.composedPath?.() ?? [])
+        .filter(n => n instanceof HTMLElement)
+        .map(n => (n as HTMLElement).tagName.toLowerCase())
+        .join(' → ')
 
-log(`[direct] phase=${phase}, path=${path}`);
-    };
+      log(`[direct] phase=${phase}, path=${path}`)
+    }
   }
 
-  outer.addEventListener("click", handler("outer"));
-  middle.addEventListener("click", handler("middle"));
-  inner.addEventListener("click", handler("inner"));
+  outer.addEventListener('click', handler('outer'))
+  middle.addEventListener('click', handler('middle'))
+  inner.addEventListener('click', handler('inner'))
 
   cleanup = () => {
-    outer.replaceWith(outer.cloneNode(true));
-    middle.replaceWith(middle.cloneNode(true));
-    inner.replaceWith(inner.cloneNode(true));
-  };
+    outer.replaceWith(outer.cloneNode(true))
+    middle.replaceWith(middle.cloneNode(true))
+    inner.replaceWith(inner.cloneNode(true))
+  }
 }
 
 // TODO: Step 5 - Implement delegated listener mode
@@ -155,42 +156,41 @@ log(`[direct] phase=${phase}, path=${path}`);
 // Log the same info but note it's coming from the delegated handler
 // This is the pattern you'll use for menus, tables, tag lists, etc.
 function setupDelegatedListener() {
-  log("--- switched to delegated listener ---");
+  log('--- switched to delegated listener ---')
 
   function delegatedHandler(event: MouseEvent) {
-    const target = event.target as HTMLElement | null;
-    const box = target?.closest<HTMLElement>(".box");
-    if (!box) return;
+    const target = event.target as HTMLElement | null
+    const box = target?.closest<HTMLElement>('.box')
+    if (!box) return
 
-    const name = box.dataset.name ?? "unknown";
-    if (stopPropCheckbox.checked && name === "inner") {
-      event.stopPropagation();
+    const name = box.dataset.name ?? 'unknown'
+    if (stopPropCheckbox.checked && name === 'inner') {
+      event.stopPropagation()
     }
 
     log(
       `[delegated] handler=box-root, target=${target?.dataset.name}, closestBox=${name}`
-    );
+    )
   }
 
-  boxRoot.addEventListener("click", delegatedHandler);
+  boxRoot.addEventListener('click', delegatedHandler)
 
   cleanup = () => {
-    boxRoot.removeEventListener("click", delegatedHandler);
-  };
+    boxRoot.removeEventListener('click', delegatedHandler)
+  }
 }
-modeInputs.forEach((input) => {
-  input.addEventListener("change", () => {
-    if (!input.checked) return;
-    if (cleanup) cleanup(); // Remove old listeners
+modeInputs.forEach(input => {
+  input.addEventListener('change', () => {
+    if (!input.checked) return
+    if (cleanup) cleanup() // Remove old listeners
     // After cleanup, setup functions will re-query elements, so fresh references
-    if (input.value === "direct") {
-      setupDirectListeners();
+    if (input.value === 'direct') {
+      setupDirectListeners()
     } else {
-      setupDelegatedListener();
+      setupDelegatedListener()
     }
-  });
-});
-
+  })
+})
 
 // TODO: Step 6 - Wire up mode switching
 // Listen for changes on the radio buttons (name="mode")
@@ -203,11 +203,9 @@ modeInputs.forEach((input) => {
 //   2. Set up new listeners based on selected mode
 //   3. Log a separator line to show the switch
 
-
-
 // initial mode
-setupDirectListeners();
-setupDelegatedListener();
+setupDirectListeners()
+setupDelegatedListener()
 
 // TODO: Step 7 (Optional but powerful) - Show event phase
 // Extend handlers to log event.eventPhase (1=capture, 2=target, 3=bubble)
@@ -226,5 +224,4 @@ setupDelegatedListener();
 // Show the tag name in the output element
 // This demonstrates real-world delegation pattern (menus, tables, dynamic lists)
 
-export { } // Make this a module
-
+export {} // Make this a module

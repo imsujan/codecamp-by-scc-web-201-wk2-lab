@@ -35,4 +35,3 @@ import './modalLab'
 
 console.log('🔬 Browser Mechanics Lab loaded')
 console.log('📝 TODO: Implement the three panels following lab instructions')
-
